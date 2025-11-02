@@ -1,0 +1,57 @@
+name: AuthTaskBackend
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  web:
+    build:
+      context: .
+    container_name: app_web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ROLE: web
+      DB_HOST: host.docker.internal
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 8010
+      WORKERS: 4
+      THREADS: 2
+      TIMEOUT: 120
+      CREATE_SUPERUSER: "1"
+      DJANGO_SUPERUSER_EMAIL: admin@admin.com
+      DJANGO_SUPERUSER_PASSWORD: 12
+      DJANGO_SUPERUSER_FIRST_NAME: admin
+    ports:
+      - "8010:8010"
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - static_data:/app/staticfiles
+
+  worker:
+    build:
+      context: .
+    container_name: app_worker
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ROLE: worker
+      DB_HOST: host.docker.internal
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  static_data:

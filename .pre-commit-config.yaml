@@ -1,0 +1,34 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        args:
+          - "--line-length=100"
+        exclude: "(__init__\\.py$|admin\\.py$|schema_extensions\\.py$|settings\\.py$|migrations/|tests/)"
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        args:
+          - "--profile=black"
+          - "--line-length=100"
+        exclude: "(__init__\\.py$|admin\\.py$|schema_extensions\\.py$|settings\\.py$|migrations/|tests/)"
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.2.0
+    hooks:
+      - id: flake8
+        exclude: "(__init__\\.py$|admin\\.py$|schema_extensions\\.py$|settings\\.py$|migrations/|tests\\.py$|tests/)"
+        args: [ "--max-line-length=100" ]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+        exclude: "(migrations/|tests/|admin\\.py$|schema_extensions\\.py$|settings\\.py$)"
+      - id: end-of-file-fixer
+        exclude: "(migrations/|tests/|__init__\\.py$|admin\\.py$|schema_extensions\\.py$|settings\\.py$)"
+      - id: trailing-whitespace
+        exclude: "(migrations/|tests/|__init__\\.py$|admin\\.py$|schema_extensions\\.py$|settings\\.py$)"

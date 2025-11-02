@@ -1,0 +1,47 @@
+name: CD -> VPS
+
+on:
+  workflow_run:
+    workflows:
+      - "CI"
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.actor != 'github-actions[bot]' }}
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Deleting old images and containers and creating new ones on VPS"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: '22'
+          script: |
+            set -e
+            cd /home/${{ secrets.SERVER_USER }}/AuthTaskBackend/backend
+
+            # Stash local changes if any
+            if ! git diff-index --quiet HEAD --; then
+                echo "Local changes found, stashing..."
+                git stash push -m "auto-cd-stash" || true
+            fi
+
+            # Pull latest main
+            git fetch origin dev
+            git reset --hard origin/dev
+
+            docker compose down --remove-orphans
+            docker images --format "{{.Repository}} {{.ID}}" | grep 'AuthTaskBackend' | awk '{print $2}' | xargs -r sudo docker rmi
+            docker image prune -f
+            docker network ls --format '{{.Name}}' | grep '^AuthTaskBackend' | xargs -r sudo docker network rm
+
+            docker compose build
+            docker compose up -d
