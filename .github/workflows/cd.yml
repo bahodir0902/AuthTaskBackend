@@ -39,9 +39,9 @@ jobs:
             git reset --hard origin/main
 
             docker compose down --remove-orphans
-            docker images --format "{{.Repository}} {{.ID}}" | grep 'AuthTaskBackend' | awk '{print $2}' | xargs -r sudo docker rmi
-            docker image prune -f
-            docker network ls --format '{{.Name}}' | grep '^AuthTaskBackend' | xargs -r sudo docker network rm
+            #docker images --format "{{.Repository}} {{.ID}}" | grep 'AuthTaskBackend' | awk '{print $2}' | xargs -r docker rmi
+            #docker image prune -f
+            #docker network ls --format '{{.Name}}' | grep '^AuthTaskBackend' | xargs -r docker network rm
 
             docker compose build
             docker compose up -d
