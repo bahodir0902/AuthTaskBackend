@@ -8,3 +8,8 @@ class IsAdminRole(permissions.BasePermission):
         if not request.user.is_authenticated:
             return False
         return request.user.is_superuser or request.user.role == Role.ADMIN
+
+
+class IsManagerRole(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == Role.MANAGER

@@ -1,2 +1,7 @@
 from .blacklist_token import BlacklistedToken
 from .issued_token import IssuedRefreshToken
+
+__all__ = [
+    "BlacklistedToken",
+    "IssuedRefreshToken",
+]

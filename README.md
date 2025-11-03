@@ -34,6 +34,7 @@ A comprehensive authentication and authorization backend service featuring JWT-b
 **Developer Experience**
 - 📚 Interactive Swagger/OpenAPI documentation
 - 🐳 Docker Compose setup
+- CI/CD ready workflows
 - 📬 Asynchronous email delivery via Celery
 - ⚡ Redis caching layer
 - 🧪 Comprehensive pytest test suite
@@ -335,9 +336,9 @@ Permissions:
   ✓ read_own: True
   ✓ create: True
   ✓ update_own: True
+  ✓ delete_own: False
   ✗ read_all: False
   ✗ update_all: False
-  ✗ delete_own: False
   ✗ delete_all: False
 ```
 
@@ -346,9 +347,26 @@ Permissions:
 Role: MANAGER
 Resource: orders
 Permissions:
-  ✓ read_all: True
+  ✓ read_own: True
   ✓ create: True
-  ✓ update_all: True
+  ✓ update_own: True
+  ✓ read_all: True
+  ✓ delete_own: True
+  ✗ update_all: False
+  ✗ delete_all: False
+```
+
+**Guest Role - Orders Resource**
+```
+Role: Guest
+Resource: orders
+Permissions:
+  ✗ read_own: False
+  ✗ create: False
+  ✗ update_own: False
+  ✗ read_all: False
+  ✗ delete_own: False
+  ✗ update_all: False
   ✗ delete_all: False
 ```
 
@@ -359,12 +377,14 @@ In **Django Admin → Users**, create test accounts:
 **User 1**
 - Email: `user1@example.com`
 - Role: `USER`
+- Groups: `Users`
 - Flags: `is_active=True`, `email_verified=True`, `must_set_password=False`
 - Set password via admin
 
 **User 2**
 - Email: `user2@example.com`
 - Role: `USER`
+- Groups: `Users`
 - Same configuration as User 1
 
 ### Interactive API Testing (Swagger UI)
@@ -955,3 +975,36 @@ Special thanks to the open-source community for these amazing tools.
 Made with ❤️ by Bahodir :)
 
 </div>
+
+this should be added to Authorization layer overview!
+| Role    | List           | Retrieve             | Create | Update                   | Delete                   |
+| ------- | -------------- | -------------------- | ------ | ------------------------ | ------------------------ |
+| guest   | 401            | 401                  | 401    | 401                      | 401                      |
+| user    | 200 (own only) | 200 own / 404 others | 201    | 200 own / 404 others     | 204 own / 404 others     |
+| manager | 200 (all)      | 200 any              | 201    | 200 own / **403** others | 204 own / **403** others |
+| admin   | 200 (all)      | 200 any              | 201    | 200 any                  | 204 any                  |
+
+
+
+and this text also:
+Authorization model
+
+Resource(code, name, description) — registry of protected resources (e.g., "orders").
+
+AccessRule(role, resource, read_own, read_all, create, update_own, update_all, delete_own, delete_all) — grants actions for a role on a resource.
+
+Views declare access_resource = "<code>".
+HasResourcePermission looks up the user’s AccessRule for that resource and enforces:
+
+List/Retrieve → read_all or read_own (+ owner check for object routes)
+
+Create → create
+
+Update → update_all or update_own (+ owner check)
+
+Delete → delete_all or delete_own (+ owner check)
+
+Admins bypass checks.
+
+When only read_own is granted, the queryset is scoped to the user’s own records ⇒ other users’ objects are invisible (404).
+When read_all is granted but update_all/delete_all are False, non-owners can be read but not modified ⇒ 403 on write.

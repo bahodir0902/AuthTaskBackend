@@ -335,8 +335,12 @@ def send_activation_invite_task(self, email, first_name, uid, token):
     try:
         subject = "Приглашение присоединиться к платформе"
         from_email = FROM_EMAIL
-        frontend_url = config("FRONTEND_URL")
-        activation_link = f"{frontend_url.rstrip('/')}/activate?uid={uid}&token={token}"
+        # frontend_url = config("FRONTEND_URL", default='127.0.0.1:5173')
+        # activation_link = f"{frontend_url.rstrip('/')}/activate?uid={uid}&token={token}"
+        domain_url = config("DOMAIN_URL", default="127.0.0.1:8000")
+        activation_link = (
+            f"{domain_url.rstrip('/')}/api/accounts/auth/activate?uid={uid}&token={token}"
+        )
         to = [email]
 
         text_content = f"""Здравствуйте, {first_name}!

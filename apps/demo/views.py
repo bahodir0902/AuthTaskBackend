@@ -1,59 +1,41 @@
-from rest_framework import mixins, status, viewsets
+from drf_spectacular.utils import extend_schema
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
-from apps.accesses.models import Resource
+from apps.accesses.models import AccessRule, Resource
 from apps.accesses.permissions import HasResourcePermission
-from apps.accesses.serializers import ResourceSerializer
+from apps.users.models.user import Role
 
-MOCK_ORDERS = [
-    {"id": 1, "owner_id": 1, "title": "Order A"},
-    {"id": 2, "owner_id": 6, "title": "Order B"},
-    {"id": 3, "owner_id": 7, "title": "Order C"},
-    {"id": 4, "owner_id": 8, "title": "Order D"},
-    {"id": 5, "owner_id": 9, "title": "Order E"},
-    {"id": 6, "owner_id": 10, "title": "Order F"},
-]
+from .models import Order
+from .serializers import OrderSerializer
 
 
-class OrdersViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-):
+@extend_schema(tags=["Orders"])
+class OrdersViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, HasResourcePermission]
     access_resource = "orders"
-    owner_field = "owner_id"  # because mock dicts, owner is just an int
-    queryset = Resource.objects.none()
-    serializer_class = ResourceSerializer
+    queryset = Order.objects.select_related("user").all()
+    serializer_class = OrderSerializer
 
-    def list(self, request, *args, **kwargs):
-        # if user has read_all → return all, else filter by owner
-        # HasResourcePermission will have already checked rule.read_all; if not allowed,
-        # it still allows read_own and we filter here:
-        show_all = request.user.role == "admin"  # extra fast path
-        if not show_all:
-            # naive: check rule; or just filter to own by default
-            data = [o for o in MOCK_ORDERS if o["owner_id"] == request.user.id]
-        else:
-            data = MOCK_ORDERS
-        return Response(data)
+    def get_queryset(self):
+        user = self.request.user
+        qs = super().get_queryset()
+        if user.role == Role.ADMIN:
+            return qs
 
-    def retrieve(self, request, *args, pk=None, **kwargs):
-        obj = next((o for o in MOCK_ORDERS if o["id"] == int(pk)), None)
-        if not obj:
-            return Response({"detail": "Not found."}, status=404)
-        # trigger object permission check
-        self.check_object_permissions(request, obj)
-        return Response(obj)
+        resource = Resource.objects.filter(code=self.access_resource).first()
+        rule = (
+            AccessRule.objects.filter(role=user.role, resource=resource).first()
+            if resource
+            else None
+        )
 
-    def create(self, request, *args, **kwargs):
-        # HasResourcePermission already checked rule.create
-        new = {
-            "id": max(o["id"] for o in MOCK_ORDERS) + 1,
-            "owner_id": request.user.id,
-            "title": request.data.get("title"),
-        }
-        MOCK_ORDERS.append(new)
-        return Response(new, status=status.HTTP_201_CREATED)
+        if rule and rule.read_all:
+            return qs
+        if rule and rule.read_own:
+            return qs.filter(user=user)
+
+        return qs.none()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
