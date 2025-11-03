@@ -26,7 +26,7 @@ jobs:
           port: '22'
           script: |
             set -e
-            cd /home/${{ secrets.SERVER_USER }}/AuthTaskBackend/backend
+            cd /home/${{ secrets.SERVER_USER }}/AuthTaskBackend/
 
             # Stash local changes if any
             if ! git diff-index --quiet HEAD --; then
@@ -36,7 +36,7 @@ jobs:
 
             # Pull latest main
             git fetch origin dev
-            git reset --hard origin/dev
+            git reset --hard origin/main
 
             docker compose down --remove-orphans
             docker images --format "{{.Repository}} {{.ID}}" | grep 'AuthTaskBackend' | awk '{print $2}' | xargs -r sudo docker rmi
