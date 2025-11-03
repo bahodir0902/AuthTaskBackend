@@ -35,7 +35,7 @@ jobs:
             fi
 
             # Pull latest main
-            git fetch origin dev
+            git fetch origin main
             git reset --hard origin/main
 
             docker compose down --remove-orphans
