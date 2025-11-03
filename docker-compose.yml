@@ -34,7 +34,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - staticfiles:/app/staticfiles
+      - ./staticfiles:/app/staticfiles
 
   worker:
     build:
@@ -52,6 +52,3 @@ services:
       - redis
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-volumes:
-  static_data:
