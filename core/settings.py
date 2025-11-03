@@ -157,9 +157,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -247,8 +250,8 @@ SPECTACULAR_SETTINGS = {
 
 JWT_SECRET = SECRET_KEY
 JWT_ALGORITHM = "HS256"
-JWT_ACCESS_LIFETIME = datetime.timedelta(minutes=15)
-JWT_REFRESH_LIFETIME = datetime.timedelta(days=7)
+JWT_ACCESS_LIFETIME = datetime.timedelta(days=15)
+JWT_REFRESH_LIFETIME = datetime.timedelta(days=60)
 JWT_REFRESH_ROTATE = True
 JWT_AUDIENCE = None
 JWT_ISSUER = "Reliable Issuer"

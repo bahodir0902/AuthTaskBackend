@@ -1,2 +1,7 @@
 from .set_initial_password_serializer import SetInitialPasswordSerializer
 from .validate_invite_serializer import ValidateInviteSerializer
+
+__all__ = [
+    "SetInitialPasswordSerializer",
+    "ValidateInviteSerializer",
+]

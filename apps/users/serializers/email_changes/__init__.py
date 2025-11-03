@@ -1,2 +1,7 @@
 from .confirm_email_change_serializer import ConfirmEmailChangeSerializer
 from .request_email_change_serializer import RequestEmailChangeSerializer
+
+__all__ = [
+    "ConfirmEmailChangeSerializer",
+    "RequestEmailChangeSerializer",
+]

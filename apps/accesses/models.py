@@ -1,3 +1,4 @@
+# from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.users.models.user import Role
@@ -5,6 +6,8 @@ from apps.users.models.user import Role
 
 class Resource(models.Model):
     code = models.CharField(max_length=64, unique=True)
+    # content_type = models.OneToOneField(ContentType, on_delete=models.CASCADE,
+    #                                     related_name="resource")
     name = models.CharField(max_length=128)
     description = models.TextField(blank=True)
 

@@ -4,7 +4,7 @@ on:
   # including merges to dev
   push:
     branches:
-      - dev
+      - main
 
   # open/update/close a PR against dev
 #  pull_request:
