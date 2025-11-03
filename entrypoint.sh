@@ -46,7 +46,7 @@ PY
 
 elif [ "$ROLE" = "worker" ]; then
   echo "🚚 Starting Celery worker..."
-  exec celery -A core worker -l info --queues=default
+  exec celery -A core worker -l info
 else
   echo "❌ Unknown ROLE=$ROLE"; exit 1
 fi
