@@ -1,4 +1,4 @@
----
+
 ## 🔐 Auth Task Backend
 
 > A production-grade authentication and authorization service built with Django REST Framework, PostgreSQL, Redis, and Celery.
@@ -9,7 +9,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-Latest-red.svg)](https://redis.io/)
 
----
+
 
 ## 🌐 Live Website
 
