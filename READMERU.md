@@ -1,4 +1,3 @@
----
 
 ## 🔐 Auth Task Backend
 
@@ -10,7 +9,6 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-Latest-red.svg)](https://redis.io/)
 
----
 
 ## 🌐 Живой Сайт этой программы
 
