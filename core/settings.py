@@ -250,7 +250,7 @@ SPECTACULAR_SETTINGS = {
 
 JWT_SECRET = SECRET_KEY
 JWT_ALGORITHM = "HS256"
-JWT_ACCESS_LIFETIME = datetime.timedelta(days=15)
+JWT_ACCESS_LIFETIME =  datetime.timedelta(days=15)
 JWT_REFRESH_LIFETIME = datetime.timedelta(days=60)
 JWT_REFRESH_ROTATE = True
 JWT_AUDIENCE = None

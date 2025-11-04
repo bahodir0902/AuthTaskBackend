@@ -1,4 +1,5 @@
-# 🔐 Auth Task Backend
+---
+## 🔐 Auth Task Backend
 
 > A production-grade authentication and authorization service built with Django REST Framework, PostgreSQL, Redis, and Celery.
 
@@ -10,35 +11,87 @@
 
 ---
 
+## 🌐 Live Website
+
+* **Swagger (API docs):** [http://13.53.73.97:8009/](http://13.53.73.97:8009/)
+* **Admin panel:** [http://13.53.73.97:8009/admin](http://13.53.73.97:8009/admin)
+
+## Video Overview
+
+### Authentication System Overview
+
+[Watch the Demo](https://youtu.be/oWUvEWSYCeE)
+
+This comprehensive video demonstration provides an in-depth walkthrough of the complete authentication system. The presentation covers the entire authentication lifecycle, including user registration workflows, email verification processes, multi-factor authentication (MFA) implementation, password recovery mechanisms, email change procedures, and additional security features. The demonstration illustrates each flow through live examples, showcasing the system's robustness and security architecture.
+
+### Authorization System Overview
+
+[Watch the Demo](https://youtu.be/TLRYm7g2qtY)
+
+This detailed demonstration presents a complete overview of the Role-Based Access Control (RBAC) authorization system. The video provides comprehensive coverage of access rule configuration, permission models, and their practical application. Through live demonstrations, the presentation illustrates how different user roles interact with resources, showcasing the granular permission system and its enforcement mechanisms across various API endpoints.
+
 ## 📋 Overview
 
 A comprehensive authentication and authorization backend service featuring JWT-based authentication, multi-factor authentication (MFA), role-based access control (RBAC), and production-ready security features. Perfect for modern web applications requiring robust user management and fine-grained permissions.
 
+### 🔎 Authorization at a Glance (Outcomes Matrix)
+
+| Role    | List           | Retrieve             | Create | Update                   | Delete                   |
+| ------- | -------------- | -------------------- | ------ | ------------------------ | ------------------------ |
+| guest   | 401            | 401                  | 401    | 401                      | 401                      |
+| user    | 200 (own only) | 200 own / 404 others | 201    | 200 own / 404 others     | 204 own / 404 others     |
+| manager | 200 (all)      | 200 any              | 201    | 200 own / **403** others | 204 own / **403** others |
+| admin   | 200 (all)      | 200 any              | 201    | 200 any                  | 204 any                  |
+
+### 🔑 Authorization Model (Summary)
+
+**Resource** (`code`, `name`, `description`) — registry of protected resources (e.g., `"orders"`).
+
+**AccessRule** (`role`, `resource`, `read_own`, `read_all`, `create`, `update_own`, `update_all`, `delete_own`, `delete_all`) — grants actions for a role on a resource.
+
+**Orders** Demo Model to demonstrate the access rules.
+
+Its view declare `access_resource = "orders"`.
+`HasResourcePermission` looks up the user's `AccessRule` for that resource and enforces:
+
+* **List/Retrieve** → `read_all` or `read_own` (+ owner check for object routes)
+* **Create** → `create`
+* **Update** → `update_all` or `update_own` (+ owner check)
+* **Delete** → `delete_all` or `delete_own` (+ owner check)
+
+Admins bypass checks.
+
+* When only `read_own` is granted, the queryset is scoped to the user's own records ⇒ other users' objects are invisible (**404**).
+* When `read_all` is granted but `update_all`/`delete_all` are **False**, non-owners can be read but not modified ⇒ **403** on write.
+
 ### ✨ Key Features
 
 **Authentication Layer**
-- 🎫 Custom JWT implementation (Access + Refresh tokens)
-- 🔄 Automatic refresh token rotation with blacklisting
-- 📧 Email/Password authentication
-- 🔐 Multi-Factor Authentication (MFA/OTP)
-- 🔑 Password reset and email change flows
-- 📨 User invitation system
-- 🚪 Logout and logout-all-devices support
+
+* 🎫 Custom JWT implementation (Access + Refresh tokens)
+* 🔄 Automatic refresh token rotation with blacklisting
+* 📧 Email/Password authentication
+* 🔐 Multi-Factor Authentication (MFA/OTP)
+* 🔑 Password reset and email change flows
+* 📨 User invitation system
+* 🚪 Logout and logout-all-devices support
 
 **Authorization Layer**
-- 👥 Role-Based Access Control (RBAC)
-- 📊 Resource and Rule management
-- 🎯 Granular permissions (read_own, read_all, create, update_own, update_all, delete_own, delete_all)
-- 🛡️ DRF permission classes with action mapping
+
+* 👥 Role-Based Access Control (RBAC)
+* 📊 Resource and Rule management
+* 🎯 Granular permissions (read_own, read_all, create, update_own, update_all, delete_own, delete_all)
+* 🛡️ DRF permission classes with action mapping
 
 **Developer Experience**
-- 📚 Interactive Swagger/OpenAPI documentation
-- 🐳 Docker Compose setup
-- CI/CD ready workflows
-- 📬 Asynchronous email delivery via Celery
-- ⚡ Redis caching layer
-- 🧪 Comprehensive pytest test suite
-- 🚦 Rate limiting on sensitive endpoints
+
+* 📚 Interactive Swagger/OpenAPI documentation
+* 🐳 Docker Compose setup
+* CI/CD ready workflows
+* 📬 Asynchronous email delivery via Celery
+* ⚡ Redis caching layer
+* 🧪 Comprehensive pytest test suite
+* 🚦 Rate limiting on sensitive endpoints
 
 ---
 
@@ -94,34 +147,36 @@ A comprehensive authentication and authorization backend service featuring JWT-b
 ### Authentication Flow
 
 **JWT Token Lifecycle**
-- Access Token: 15 minutes lifespan
-- Refresh Token: 7 days lifespan
-- Automatic rotation on refresh with old token blacklisting
+
+* Access Token: 15 minutes lifespan
+* Refresh Token: 7 days lifespan
+* Automatic rotation on refresh with old token blacklisting
 
 **MFA/OTP Security**
-- Time-limited codes stored in Redis
-- Hashed storage for security
-- Maximum attempt counter
-- Automatic expiration
+
+* Time-limited codes stored in Redis
+* Hashed storage for security
+* Maximum attempt counter
+* Automatic expiration
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Category | Technology           | Purpose |
-|----------|----------------------|---------|
-| **Core** | Python 3.13          | Runtime environment |
-| | Django 5.2.7         | Web framework |
-| | Django REST Framework | API development |
-| **Database** | PostgreSQL 16        | Primary data store |
-| **Cache & Queue** | Redis                | Caching & message broker |
-| | django-redis         | Django Redis integration |
-| | Celery               | Asynchronous task queue |
-| **Authentication** | PyJWT                | JWT token handling |
-| **Documentation** | drf-spectacular      | OpenAPI/Swagger generation |
-| **Utilities** | CORS Headers         | Cross-origin support |
-| | Whitenoise           | Static file serving |
-| **Testing** | pytest               | Test framework |
+| Category           | Technology            | Purpose                    |
+| ------------------ | --------------------- | -------------------------- |
+| **Core**           | Python 3.13           | Runtime environment        |
+|                    | Django 5.2.7          | Web framework              |
+|                    | Django REST Framework | API development            |
+| **Database**       | PostgreSQL 16         | Primary data store         |
+| **Cache & Queue**  | Redis                 | Caching & message broker   |
+|                    | django-redis          | Django Redis integration   |
+|                    | Celery                | Asynchronous task queue    |
+| **Authentication** | PyJWT                 | JWT token handling         |
+| **Documentation**  | drf-spectacular       | OpenAPI/Swagger generation |
+| **Utilities**      | CORS Headers          | Cross-origin support       |
+|                    | Whitenoise            | Static file serving        |
+| **Testing**        | pytest                | Test framework             |
 
 ---
 
@@ -146,14 +201,16 @@ auth-task-backend/
 │   │   ├── service/                # Business logic & Celery tasks
 │   │   └── signals/                # Django signals
 │   │
-│   ├── access/                     # Authorization (RBAC)
+│   ├── accesses/                   # Authorization (RBAC) — resources & access rules
 │   │   ├── models.py               # Resource & AccessRule models
 │   │   ├── permissions.py          # Custom DRF permissions
 │   │   ├── serializers.py          # RBAC serializers
 │   │   └── views.py                # RBAC management views
 │   │
-│   └── demo/                       # Demo implementation
-│       └── views.py                # Sample OrdersViewSet
+│   └── demo/                       # Temporary demo app
+│       ├── models.py               # Order model (demo of desired task)
+│       ├── serializers.py          # OrderSerializer
+│       └── views.py                # OrdersViewSet to showcase RBAC behavior
 │
 ├── tests/                          # Test suite
 │   └── users/                      # User app tests
@@ -174,10 +231,10 @@ auth-task-backend/
 
 ### Prerequisites
 
-- Docker & Docker Compose (recommended)
-- Python 3.13+ (for local development)
-- PostgreSQL 16+ (if running locally)
-- Redis (if running locally)
+* Docker & Docker Compose (recommended)
+* Python 3.13+ (for local development)
+* PostgreSQL 16+ (if running locally)
+* Redis (if running locally)
 
 ### Option A: Docker Compose (Recommended)
 
@@ -231,10 +288,11 @@ docker compose up --build
 
 **Step 3: Access Application**
 
-- **API & Swagger UI**: http://localhost:8010/
-- **Django Admin**: http://localhost:8010/admin/
-  - Email: `admin@admin.com`
-  - Password: `securepassword123`
+* **API & Swagger UI**: [http://localhost:8010/](http://localhost:8010/)
+* **Django Admin**: [http://localhost:8010/admin/](http://localhost:8010/admin/)
+
+  * Email: `admin@admin.com`
+  * Password: `securepassword123`
 
 #### Optional: PostgreSQL in Docker
 
@@ -258,6 +316,7 @@ volumes:
 ```
 
 Update environment variables:
+
 ```bash
 DB_HOST=postgres
 DB_PORT=5432
@@ -311,17 +370,18 @@ redis-server
 
 Navigate to **Django Admin → Access → Resources** and create:
 
-| Code | Name | Description |
-|------|------|-------------|
-| `orders` | Orders | Order management resource |
-| `users` | Users | User management resource |
-| `rules` | Access Rules | RBAC rule management |
+| Code     | Name         | Description               |
+| -------- | ------------ | ------------------------- |
+| `orders` | Orders       | Order management resource |
+| `users`  | Users        | User management resource  |
+| `rules`  | Access Rules | RBAC rule management      |
 
 #### 2. Define Access Rules
 
 Navigate to **Django Admin → Access → Access Rules** and configure permissions:
 
 **Admin Role - Orders Resource**
+
 ```
 Role: ADMIN
 Resource: orders
@@ -329,6 +389,7 @@ Permissions: ALL enabled (read_own, read_all, create, update_own, update_all, de
 ```
 
 **User Role - Orders Resource**
+
 ```
 Role: USER
 Resource: orders
@@ -343,6 +404,7 @@ Permissions:
 ```
 
 **Manager Role - Orders Resource**
+
 ```
 Role: MANAGER
 Resource: orders
@@ -357,6 +419,7 @@ Permissions:
 ```
 
 **Guest Role - Orders Resource**
+
 ```
 Role: Guest
 Resource: orders
@@ -375,17 +438,19 @@ Permissions:
 In **Django Admin → Users**, create test accounts:
 
 **User 1**
-- Email: `user1@example.com`
-- Role: `USER`
-- Groups: `Users`
-- Flags: `is_active=True`, `email_verified=True`, `must_set_password=False`
-- Set password via admin
+
+* Email: `user1@example.com`
+* Role: `USER`
+* Groups: `Users`
+* Flags: `is_active=True`, `email_verified=True`, `must_set_password=False`
+* Set password via admin
 
 **User 2**
-- Email: `user2@example.com`
-- Role: `USER`
-- Groups: `Users`
-- Same configuration as User 1
+
+* Email: `user2@example.com`
+* Role: `USER`
+* Groups: `Users`
+* Same configuration as User 1
 
 ### Interactive API Testing (Swagger UI)
 
@@ -459,12 +524,14 @@ In **Django Admin → Users**, create test accounts:
 ### Login Flow
 
 **Without MFA:**
+
 ```
 POST /api/accounts/auth/login/
 → Returns access & refresh tokens immediately
 ```
 
 **With MFA:**
+
 ```
 1. POST /api/accounts/auth/login/
    → System sends OTP to email
@@ -486,6 +553,7 @@ Body: { "refresh": "your-refresh-token" }
 ### Logout Flow
 
 **Single Device:**
+
 ```
 POST /api/accounts/auth/logout/
 Body: { "refresh": "your-refresh-token" }
@@ -493,6 +561,7 @@ Body: { "refresh": "your-refresh-token" }
 ```
 
 **All Devices:**
+
 ```
 POST /api/accounts/auth/logout-of-all-devices/
 → Revokes all refresh tokens for user
@@ -513,9 +582,9 @@ POST /api/accounts/auth/logout-of-all-devices/
 3. POST /api/accounts/auth/reset-password/
    Body: {
        "uid": "...",
-        "token": "...",
-        "new_password": "...",
-        "re_new_password": "..."
+       "token": "...",
+       "new_password": "...",
+       "re_new_password": "..."
    }
    → Password updated
 ```
@@ -535,12 +604,14 @@ POST /api/accounts/auth/logout-of-all-devices/
 ### Profile Management
 
 **Read Profile:**
+
 ```
 GET /api/accounts/users/profile/
 → Returns user profile data
 ```
 
 **Update Profile:**
+
 ```
 PUT/PATCH /api/accounts/users/update-profile/
 Body: {
@@ -569,60 +640,68 @@ DELETE /api/accounts/users/delete-account/
 ### Core Concepts
 
 **Resource**
-- Represents a protected entity in this system
-- Examples: orders, users, posts, comments
-- Stored in database with unique code
+
+* Represents a protected entity in this system
+* Examples: orders, users, posts, comments
+* Stored in database with unique code
 
 **Access Rule**
-- Links a role to a resource with specific permissions
-- Defines what operations are allowed
+
+* Links a role to a resource with specific permissions
+* Defines what operations are allowed
 
 **Permission Types**
 
-| Permission | Scope | Description |
-|-----------|-------|-------------|
-| `read_own` | Own | View own resources |
-| `read_all` | All | View all resources |
-| `create` | N/A | Create new resources |
-| `update_own` | Own | Modify own resources |
-| `update_all` | All | Modify all resources |
-| `delete_own` | Own | Delete own resources |
-| `delete_all` | All | Delete all resources |
+| Permission   | Scope | Description          |
+| ------------ | ----- | -------------------- |
+| `read_own`   | Own   | View own resources   |
+| `read_all`   | All   | View all resources   |
+| `create`     | N/A   | Create new resources |
+| `update_own` | Own   | Modify own resources |
+| `update_all` | All   | Modify all resources |
+| `delete_own` | Own   | Delete own resources |
+| `delete_all` | All   | Delete all resources |
 
 ### Permission Resolution
 
 **Action Mapping:**
 
-| DRF Action | HTTP Method | Required Permission |
-|-----------|-------------|-------------------|
-| `list` | GET | `read_all` or `read_own` |
-| `retrieve` | GET | `read_all` or `read_own` |
-| `create` | POST | `create` |
-| `update` | PUT/PATCH | `update_all` or `update_own` |
-| `destroy` | DELETE | `delete_all` or `delete_own` |
+| DRF Action | HTTP Method | Required Permission          |
+| ---------- | ----------- | ---------------------------- |
+| `list`     | GET         | `read_all` or `read_own`     |
+| `retrieve` | GET         | `read_all` or `read_own`     |
+| `create`   | POST        | `create`                     |
+| `update`   | PUT/PATCH   | `update_all` or `update_own` |
+| `destroy`  | DELETE      | `delete_all` or `delete_own` |
 
 **Resolution Logic:**
 
 1. Check if user has `ADMIN` role → **Grant full access**
 2. Check if `*_all` permission exists → **Grant access to all objects**
 3. Check if `*_own` permission exists:
-   - Compare object's `owner_field` with `request.user`
-   - If match → **Grant access**
-   - If no match → **Deny access (403)**
+
+   * Compare object's `owner_field` with `request.user`
+   * If match → **Grant access**
+   * If no match → **Deny access (403)**
 
 ### Implementation Example
 
 ```python
 from apps.access.permissions import HasResourcePermission
 
-class OrdersViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated, HasResourcePermission]
-    access_resource = "orders"  # Links to Resource.code
-    owner_field = "user"  # Field to check for ownership
-
-    queryset = Order.objects.all()
+class OrdersViewSet(viewsets.ModelViewSet):
+    access_resource = "orders"
+    queryset = Order.objects.select_related("user").all()
     serializer_class = OrderSerializer
 ```
+
+### Implementation Notes
+
+The current implementation uses a hardcoded `access_resource` attribute in the `OrdersViewSet` to demonstrate the RBAC functionality. This approach, while suitable for the demonstration purposes of this project, applies access rules specifically to the Order model.
+
+For a production-grade system with broader applicability, the recommended architectural approach would utilize Django's `ContentType` framework. This would involve adding a `ForeignKey` to `ContentType` in the `Resource` (as I commented out) model, enabling dynamic association of access rules with any model in the system. The model type could be determined automatically by inspecting the viewset's queryset or the serializer's Meta class, thereby providing a generic, reusable authorization layer applicable to all models across the application.
+
+This enhanced implementation was not included in the current version due to project timeline constraints. However, the existing implementation fully demonstrates the core RBAC concepts and provides a solid foundation for future extensibility.
 
 ---
 
@@ -632,53 +711,53 @@ class OrdersViewSet(ModelViewSet):
 
 **Base URL:** `/api/accounts/auth/`
 
-| Endpoint | Method | Description | Authentication |
-|----------|--------|-------------|----------------|
-| `/login/` | POST | User login | None |
-| `/refresh/` | POST | Refresh access token | None |
-| `/register/` | POST | Start registration | None |
-| `/verify-registration/` | POST | Complete registration | None |
-| `/verify-otp/` | POST | Verify MFA code | None |
-| `/forgot-password/` | POST | Request password reset | None |
-| `/verify-password-reset/` | POST | Verify reset OTP | None |
-| `/reset-password/` | POST | Set new password | None |
-| `/logout/` | POST | Logout single device | Required |
-| `/logout-of-all-devices/` | POST | Logout all devices | Required |
-| `/set-initial-password/` | POST | Set password from invitation | None |
-| `/validate-invitation/` | POST | Validate invitation token | None |
+| Endpoint                  | Method | Description                  | Authentication |
+| ------------------------- | ------ | ---------------------------- | -------------- |
+| `/login/`                 | POST   | User login                   | None           |
+| `/refresh/`               | POST   | Refresh access token         | None           |
+| `/register/`              | POST   | Start registration           | None           |
+| `/verify-registration/`   | POST   | Complete registration        | None           |
+| `/verify-otp/`            | POST   | Verify MFA code              | None           |
+| `/forgot-password/`       | POST   | Request password reset       | None           |
+| `/verify-password-reset/` | POST   | Verify reset OTP             | None           |
+| `/reset-password/`        | POST   | Set new password             | None           |
+| `/logout/`                | POST   | Logout single device         | Required       |
+| `/logout-of-all-devices/` | POST   | Logout all devices           | Required       |
+| `/set-initial-password/`  | POST   | Set password from invitation | None           |
+| `/validate-invitation/`   | POST   | Validate invitation token    | None           |
 
 ### User Management Endpoints
 
 **Base URL:** `/api/accounts/users/`
 
-| Endpoint | Method | Description | Authentication |
-|----------|--------|-------------|----------------|
-| `/profile/` | GET | Get user profile | Required |
-| `/update-profile/` | PUT/PATCH | Update profile | Required |
-| `/request-email-change/` | POST | Request email change | Required |
-| `/confirm-email-change/` | POST | Confirm email change | Required |
-| `/delete-account/` | DELETE | Soft delete account | Required |
+| Endpoint                 | Method    | Description          | Authentication |
+| ------------------------ | --------- | -------------------- | -------------- |
+| `/profile/`              | GET       | Get user profile     | Required       |
+| `/update-profile/`       | PUT/PATCH | Update profile       | Required       |
+| `/request-email-change/` | POST      | Request email change | Required       |
+| `/confirm-email-change/` | POST      | Confirm email change | Required       |
+| `/delete-account/`       | DELETE    | Soft delete account  | Required       |
 
 ### RBAC Administration Endpoints
 
 **Base URL:** `/api/access/`
 
-| Endpoint | Method | Description | Authentication | Permission |
-|----------|--------|-------------|----------------|-----------|
-| `/resources/` | GET | List resources | Required | Admin |
-| `/resources/` | POST | Create resource | Required | Admin |
-| `/resources/{id}/` | GET/PUT/DELETE | Manage resource | Required | Admin |
-| `/rules/` | GET | List access rules | Required | Admin |
-| `/rules/` | POST | Create rule | Required | Admin |
-| `/rules/{id}/` | GET/PUT/DELETE | Manage rule | Required | Admin |
+| Endpoint           | Method         | Description       | Authentication | Permission |
+| ------------------ | -------------- | ----------------- | -------------- | ---------- |
+| `/resources/`      | GET            | List resources    | Required       | Admin      |
+| `/resources/`      | POST           | Create resource   | Required       | Admin      |
+| `/resources/{id}/` | GET/PUT/DELETE | Manage resource   | Required       | Admin      |
+| `/rules/`          | GET            | List access rules | Required       | Admin      |
+| `/rules/`          | POST           | Create rule       | Required       | Admin      |
+| `/rules/{id}/`     | GET/PUT/DELETE | Manage rule       | Required       | Admin      |
 
 ### Documentation Endpoints
 
-| Endpoint | Description |
-|----------|-------------|
-| `/` | Swagger UI (Interactive API documentation) |
-| `/schema/` | OpenAPI schema (JSON) |
-| `/admin/` | Django administration interface |
+| Endpoint   | Description                                |
+| ---------- | ------------------------------------------ |
+| `/`        | Swagger UI (Interactive API documentation) |
+| `/schema/` | OpenAPI schema (JSON)                      |
+| `/admin/`  | Django administration interface            |
 
 ---
 
@@ -703,28 +782,29 @@ pytest --cov=apps --cov-report=html
 ### Test Configuration
 
 Tests use `core.settings_test` with:
-- SQLite in-memory database
-- Local memory cache backend
-- Console email backend
-- Celery eager mode (synchronous)
+
+* SQLite in-memory database
+* Local memory cache backend
+* Console email backend
+* Celery eager mode (synchronous)
 
 ### Test Coverage
 
 The test suite covers:
 
-- ✅ User registration flow
-- ✅ Email verification
-- ✅ Login (with and without MFA)
-- ✅ OTP generation and validation
-- ✅ Token refresh and rotation
-- ✅ Token blacklisting
-- ✅ Logout (single and all devices)
-- ✅ Password reset flow
-- ✅ Email change flow
-- ✅ Profile management
-- ✅ Account soft deletion
-- ✅ Rate limiting on sensitive endpoints
-- ✅ RBAC permission checks
+* ✅ User registration flow
+* ✅ Email verification
+* ✅ Login (with and without MFA)
+* ✅ OTP generation and validation
+* ✅ Token refresh and rotation
+* ✅ Token blacklisting
+* ✅ Logout (single and all devices)
+* ✅ Password reset flow
+* ✅ Email change flow
+* ✅ Profile management
+* ✅ Account soft deletion
+* ✅ Rate limiting on sensitive endpoints
+* ✅ RBAC permission checks
 
 ### Writing New Tests
 
@@ -751,9 +831,11 @@ def test_user_creation():
 ### JWT Token Security
 
 **Best Practices:**
-- In this project I get `JWT_SECRET` from `SECRET_KEY`, but in real development, we need to set dedicated `JWT_SECRET`, separate from `SECRET_KEY` in production
+
+* In this project I get `JWT_SECRET` from `SECRET_KEY`, but in real development, we need to set dedicated `JWT_SECRET`, separate from `SECRET_KEY` in production
 
 **Configuration:**
+
 ```python
 # settings.py
 JWT_SECRET = os.getenv('JWT_SECRET', SECRET_KEY)
@@ -764,35 +846,39 @@ JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=7)
 ### OTP Security
 
 **Implementation:**
-- OTP codes are hashed before storage
-- Time-limited validity (5 minutes by default)
-- Maximum attempt counter (5 attempts)
-- Stored in Redis cache (auto-expiration)
-- Rate limiting on OTP endpoints
+
+* OTP codes are hashed before storage
+* Time-limited validity (5 minutes by default)
+* Maximum attempt counter (5 attempts)
+* Stored in Redis cache (auto-expiration)
+* Rate limiting on OTP endpoints
 
 ### Password Security
 
 **Django's Built-in Protection:**
-- PBKDF2 password hashing
-- Password validation rules
-- Minimum length requirements
-- Common password checks
+
+* PBKDF2 password hashing
+* Password validation rules
+* Minimum length requirements
+* Common password checks
 
 ### Rate Limiting
 
 **Protected Endpoints:**
-- Login: 5 requests per minute
-- Registration: 3 requests per minute
-- OTP verification: 5 requests per minute
-- Password reset: 3 requests per minute
+
+* Login: 5 requests per minute
+* Registration: 3 requests per minute
+* OTP verification: 5 requests per minute
+* Password reset: 3 requests per minute
 
 ### Data Privacy
 
 **User Data Handling:**
-- Soft delete preserves data for compliance
-- Personal data encrypted at rest (PostgreSQL level)
-- Secure password reset tokens
-- OTP codes not logged
+
+* Soft delete preserves data for compliance
+* Personal data encrypted at rest (PostgreSQL level)
+* Secure password reset tokens
+* OTP codes not logged
 
 ---
 
@@ -803,6 +889,7 @@ JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=7)
 The `entrypoint.sh` script supports two operational modes:
 
 **Web Role (`ROLE=web`)**
+
 ```bash
 ROLE=web
 → Run migrations
@@ -811,6 +898,7 @@ ROLE=web
 ```
 
 **Worker Role (`ROLE=worker`)**
+
 ```bash
 ROLE=worker
 → Wait for database (optional)
@@ -848,11 +936,13 @@ ROLE=worker
 ### Monitoring & Logging
 
 **Log Locations:**
-- Application logs: `app.log`
-- Console output: stdout/stderr
-- Database logs: via custom handler (apps.logs)
+
+* Application logs: `app.log`
+* Console output: stdout/stderr
+* Database logs: via custom handler (apps.logs)
 
 **Celery Monitoring:**
+
 ```bash
 # Monitor Celery tasks
 celery -A core inspect active
@@ -867,20 +957,23 @@ celery -A core inspect registered
 ### Scaling Considerations(I'm planning to do it in future)
 
 **Horizontal Scaling:**
-- Web instances: Scale behind load balancer
-- Celery workers: Scale based on queue length
-- Redis: Redis Cluster for high availability
-- PostgreSQL: Set up read replicas
+
+* Web instances: Scale behind load balancer
+* Celery workers: Scale based on queue length
+* Redis: Redis Cluster for high availability
+* PostgreSQL: Set up read replicas
 
 **Performance Optimization:**
-- Enable query caching in Redis
-- Use connection pooling (pgbouncer)
-- Configure Gunicorn workers: `workers = (2 * CPU_cores) + 1`
-- Use CDN for static files
+
+* Enable query caching in Redis
+* Use connection pooling (pgbouncer)
+* Configure Gunicorn workers: `workers = (2 * CPU_cores) + 1`
+* Use CDN for static files
 
 ### Backup Strategy
 
 **Database:**
+
 ```bash
 # Backup
 pg_dump -U appuser -h localhost appdb > backup_$(date +%Y%m%d).sql
@@ -890,6 +983,7 @@ psql -U appuser -h localhost appdb < backup_20251103.sql
 ```
 
 **Redis:**
+
 ```bash
 # Configure Redis persistence
 # In redis.conf:
@@ -906,24 +1000,15 @@ save 60 10000
 
 Documentation includes visual guides for:
 
-- Swagger UI interface
-- Django Admin panel
-- RBAC configuration
-- API request/response examples
-- Error handling demonstrations
+* Swagger UI interface
+* Django Admin panel
+* RBAC configuration
+* API request/response examples
+* Error handling demonstrations
 
 **Location:** `docs/images/`
 
-### Video Tutorial
 
-A comprehensive walkthrough video demonstrating:
-- Initial setup and configuration
-- Creating resources and rules
-- User registration and authentication
-- RBAC permissions in action
-- Common troubleshooting scenarios
-
-**YouTube Link:** _[To be added]_
 
 ---
 
@@ -949,20 +1034,21 @@ mypy apps/
 
 For questions, issues, or feature requests:
 
-- **Issues:** Open an issue on GitHub
-- **Documentation:** Check the `/docs` directory
-- **Email:** vbahodir00@gmail.com
+* **Issues:** Open an issue on GitHub
+* **Documentation:** Check the `/docs` directory
+* **Email:** [vbahodir00@gmail.com](mailto:vbahodir00@gmail.com)
 
 ---
 
 ## 🙏 Acknowledgments
 
 Built with:
-- Django & Django REST Framework
-- PostgreSQL
-- Redis
-- Celery
-- drf-spectacular
+
+* Django & Django REST Framework
+* PostgreSQL
+* Redis
+* Celery
+* drf-spectacular
 
 Special thanks to the open-source community for these amazing tools.
 
@@ -975,36 +1061,3 @@ Special thanks to the open-source community for these amazing tools.
 Made with ❤️ by Bahodir :)
 
 </div>
-
-this should be added to Authorization layer overview!
-| Role    | List           | Retrieve             | Create | Update                   | Delete                   |
-| ------- | -------------- | -------------------- | ------ | ------------------------ | ------------------------ |
-| guest   | 401            | 401                  | 401    | 401                      | 401                      |
-| user    | 200 (own only) | 200 own / 404 others | 201    | 200 own / 404 others     | 204 own / 404 others     |
-| manager | 200 (all)      | 200 any              | 201    | 200 own / **403** others | 204 own / **403** others |
-| admin   | 200 (all)      | 200 any              | 201    | 200 any                  | 204 any                  |
-
-
-
-and this text also:
-Authorization model
-
-Resource(code, name, description) — registry of protected resources (e.g., "orders").
-
-AccessRule(role, resource, read_own, read_all, create, update_own, update_all, delete_own, delete_all) — grants actions for a role on a resource.
-
-Views declare access_resource = "<code>".
-HasResourcePermission looks up the user’s AccessRule for that resource and enforces:
-
-List/Retrieve → read_all or read_own (+ owner check for object routes)
-
-Create → create
-
-Update → update_all or update_own (+ owner check)
-
-Delete → delete_all or delete_own (+ owner check)
-
-Admins bypass checks.
-
-When only read_own is granted, the queryset is scoped to the user’s own records ⇒ other users’ objects are invisible (404).
-When read_all is granted but update_all/delete_all are False, non-owners can be read but not modified ⇒ 403 on write.
