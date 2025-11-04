@@ -139,7 +139,6 @@
 │  Celery Workers                                             │
 │  • Доставка писем                                           │
 │  • Генерация OTP                                            │
-│  • Система уведомлений                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -372,7 +371,6 @@ redis-server
 | Код      | Имя          | Описание                         |
 | -------- | ------------ | -------------------------------- |
 | `orders` | Orders       | Ресурс управления заказами       |
-| `users`  | Users        | Ресурс управления пользователями |
 | `rules`  | Access Rules | Управление правилами RBAC        |
 
 #### 2. Определение правил доступа
@@ -441,8 +439,7 @@ Permissions:
 * Email: `user1@example.com`
 * Role: `USER`
 * Groups: `Users`
-* Флаги: `is_active=True`, `email_verified=True`, `must_set_password=False`
-* Установите пароль через админку
+* Флаги: `is_active=True`, `email_verified=True`, `must_set_password=False`, `Let use set password=False` и поставьте пароль, например `12`
 
 **User 2**
 
@@ -858,7 +855,6 @@ JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=7)
 
 * Хэширование паролей PBKDF2
 * Правила валидации паролей
-* Минимальная длина
 * Проверка на популярные пароли
 
 ### Ограничение частоты запросов
@@ -1047,7 +1043,6 @@ mypy apps/
 * Celery
 * drf-spectacular
 
-Отдельная благодарность open-source сообществу за эти потрясающие инструменты.
 
 ---
 

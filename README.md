@@ -140,7 +140,6 @@ Admins bypass checks.
 │  Celery Workers                                             │
 │  • Email delivery                                           │
 │  • OTP generation                                           │
-│  • Notification system                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -370,11 +369,10 @@ redis-server
 
 Navigate to **Django Admin → Access → Resources** and create:
 
-| Code     | Name         | Description               |
-| -------- | ------------ | ------------------------- |
+| Code    | Name         | Description               |
+| ------- | ------------ | ------------------------- |
 | `orders` | Orders       | Order management resource |
-| `users`  | Users        | User management resource  |
-| `rules`  | Access Rules | RBAC rule management      |
+| `rules` | Access Rules | RBAC rule management      |
 
 #### 2. Define Access Rules
 
@@ -442,8 +440,7 @@ In **Django Admin → Users**, create test accounts:
 * Email: `user1@example.com`
 * Role: `USER`
 * Groups: `Users`
-* Flags: `is_active=True`, `email_verified=True`, `must_set_password=False`
-* Set password via admin
+* Flags: `is_active=True`, `email_verified=True`, `must_set_password=False`, `Let use set password=False` and set a password, for instance `12`
 
 **User 2**
 
@@ -859,7 +856,6 @@ JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=7)
 
 * PBKDF2 password hashing
 * Password validation rules
-* Minimum length requirements
 * Common password checks
 
 ### Rate Limiting
@@ -1050,7 +1046,6 @@ Built with:
 * Celery
 * drf-spectacular
 
-Special thanks to the open-source community for these amazing tools.
 
 ---
 
